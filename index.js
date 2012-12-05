@@ -3,9 +3,6 @@ var util = require('util');
 var async = require('async');
 
 
-//TODO optimize with draining
-
-
 function EnrichStream(enrichFunc, enrichConcurrency) {
     "use strict";
 
