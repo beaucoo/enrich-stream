@@ -3,6 +3,15 @@ var util = require('util');
 var async = require('async');
 
 
+// EnrichStream
+// BeauCoo 2012
+// info@beaucoo.com
+//
+// A stream that enables asynchronous enrichment of data with concurrency control while preserving FIFO ordering.
+//
+// Controlling enrichment concurrency via https://github.com/caolan/async/#queue
+// 'enrichFunc' - function(task, callback) {}
+// 'enrichConcurrency' - positive integer
 function EnrichStream(enrichFunc, enrichConcurrency) {
     "use strict";
 
