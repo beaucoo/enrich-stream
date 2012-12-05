@@ -1,6 +1,6 @@
 #EnrichStream
 
-A stream that provides asynchronous enrichment of data and guarantees FIFO ordering.
+A stream that enables asynchronous enrichment of data with concurrency control while maintaining FIFO ordering.
 
 ##Implementation
 Enrichment is asynchronous.
