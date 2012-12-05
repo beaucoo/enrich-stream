@@ -10,13 +10,20 @@ var async = require('async');
 // A stream that enables asynchronous enrichment of data with concurrency control while preserving FIFO ordering.
 //
 // Controlling enrichment concurrency via https://github.com/caolan/async/#queue
-// 'enrichFunc' - function(task, callback) {}
+// 'shouldEnrichFunc' - function(data) { return true/false; } to skip/perform async enrichment
+// 'enrichFunc' - function(data, callback) { callback(); }
 // 'enrichConcurrency' - positive integer
-function EnrichStream(enrichFunc, enrichConcurrency) {
+function EnrichStream(shouldEnrichFunc, enrichFunc, enrichConcurrency) {
     "use strict";
 
+    if (!shouldEnrichFunc) {
+        shouldEnrichFunc = function (data) {
+            return false;
+        };
+    }
+
     if (!enrichFunc) {
-        enrichFunc = function (task, callback) {
+        enrichFunc = function (data, callback) {
             callback();
         };
     }
@@ -34,7 +41,9 @@ function EnrichStream(enrichFunc, enrichConcurrency) {
     var destroyed = false;
 
 
-    function workCompleted() {
+    function workCompleted(work) {
+        work.done = true;
+
         if (streamingOut || destroyed) {
             return;
         }
@@ -60,8 +69,7 @@ function EnrichStream(enrichFunc, enrichConcurrency) {
                 console.log(err);
             }
 
-            work.done = true;
-            workCompleted();
+            workCompleted(work);
         };
     }
 
@@ -70,7 +78,13 @@ function EnrichStream(enrichFunc, enrichConcurrency) {
         workCount++;
         var work = {data:data, done:false};
         buffer.push(work);
-        queue.push(data, getEnrichedFunc(work));
+
+        if (shouldEnrichFunc(work.data)) {
+            queue.push(data, getEnrichedFunc(work));
+        } else {
+            workCompleted(work);
+        }
+
         return true;
     };
 

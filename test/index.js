@@ -4,8 +4,8 @@ var should = require('should');
 
 
 var minMs = 0;
-var maxMs = 0;
-var count = 1000;
+var maxMs = 10;
+var count = 10000;
 var concurrency = 10;
 
 
@@ -13,17 +13,23 @@ var concurrency = 10;
 var array = [];
 for (var i = 0; i < count; i++) {
     var timeout = Math.floor((Math.random() * maxMs) + minMs);
-    array.push(timeout);
+    var sign = Math.floor((Math.random() * 2) + 1) === 2 ? 1 : -1;
+    array.push(timeout * sign);
 }
 console.log("Array length: " + array.length);
 
 
 // Configure enrichment stream
-var enrichStream = new EnrichStream(function (timeout, callback) {
-    setTimeout(function () {
-        callback();
-    }, timeout);
-}, concurrency);
+var enrichStream = new EnrichStream(
+    function perform(timeout) {
+//        console.log("%s %d", ((0 <= timeout) ? "enriched" : "skipped"), timeout);
+        return (0 <= timeout);
+    },
+    function enrich(timeout, callback) {
+        setTimeout(function () {
+            callback();
+        }, timeout);
+    }, concurrency);
 
 
 // Verify FIFO
