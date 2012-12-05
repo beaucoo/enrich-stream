@@ -1,13 +1,46 @@
 {
     "name":"enrich-stream",
-    "description":"A stream that allows asynchronous enrichment of items while preserving FIFO ordering",
-    "engines":{
-        "node":"node >= 0.8.0"
-    },
     "version":"0.1.0",
+    "description":"A stream that enables asynchronous enrichment of data with concurrency control while preserving FIFO ordering.",
+    "main":"./enrich-stream",
+    "keywords":[
+        "stream",
+        "async",
+        "asynchronous",
+        "FIFO",
+        "enrich"
+    ],
+    "engines":[
+        "node"
+    ],
+    "directories":{
+        "test":"./test"
+    },
+    "scripts":{
+        "test":"node test"
+    },
+    "contributors":[
+        {
+            "name":"BeauCoo",
+            "email":"info@beaucoo.com",
+            "url":"http://beaucoo.com/"
+        },
+        {
+            "name":"Rick Cotter",
+            "email":"rick@beaucoo.com"
+        }
+    ],
+    "bugs": {
+        "url": "https://github.com/beaucoo/enrich-stream/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/beaucoo/enrich-stream.git"
+    },
     "dependencies":{
         "async":"0.1.22"
     },
+    "readmeFilename": "README.md",
     "devDependencies":{
         "should":"~1.2.1",
         "arraystream":"~0.0.5"
