@@ -48,18 +48,15 @@ function EnrichStream(shouldEnrichFunc, enrichFunc, enrichConcurrency) {
 
         streamingOut = true;
         while (streamingOut && buffer.length && buffer[0].done) {
-//            console.log("Enriched %s", buffer[0].data._id);
             self.emit('data', buffer.shift().data);
             completedCount++;
         }
         streamingOut = false;
 
-        console.log("endWanted %d, completedCount %d, workCount %d", endWanted, completedCount, workCount);
         if (endWanted === true && completedCount === workCount) {
             self.ended = true;
             self.writable = false;
             self.emit('end');
-            console.log("Done enriching");
         }
     }
 
