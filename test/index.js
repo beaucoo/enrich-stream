@@ -5,7 +5,7 @@ var should = require('should');
 
 var minMs = 0;
 var maxMs = 10;
-var count = 10000;
+var count = 1000;
 var concurrency = 10;
 
 
@@ -22,12 +22,12 @@ console.log("Array length: " + array.length);
 // Configure enrichment stream
 var enrichStream = new EnrichStream(
     function perform(timeout) {
-//        console.log("%s %d", ((0 <= timeout) ? "enriched" : "skipped"), timeout);
+//        console.log("%s %d", ((0 <= timeout) ? "enrich" : "skipped"), timeout);
         return (0 <= timeout);
     },
     function enrich(timeout, callback) {
         setTimeout(function () {
-            callback();
+            callback(null, timeout + 1);
         }, timeout);
     }, concurrency);
 
@@ -36,7 +36,12 @@ var enrichStream = new EnrichStream(
 var outIndex = 0;
 enrichStream.on('data',
     function (timeout) {
-        timeout.should.equal(array[outIndex++]);
+        var enriched = 0 <= timeout;
+        if (enriched) {
+            timeout.should.equal(array[outIndex++] + 1);
+        } else {
+            timeout.should.equal(array[outIndex++]);
+        }
     }).on('end', function () {
         outIndex.should.equal(array.length);
     });

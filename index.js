@@ -11,7 +11,7 @@ var async = require('async');
 //
 // Controlling enrichment concurrency via https://github.com/caolan/async/#queue
 // 'shouldEnrichFunc' - function(data) { return true/false; } to skip/perform async enrichment
-// 'enrichFunc' - function(data, callback) { callback(); }
+// 'enrichFunc' - function(data, callback) { callback(null, enrichedData); } to update input data with enriched data
 // 'enrichConcurrency' - positive integer
 function EnrichStream(shouldEnrichFunc, enrichFunc, enrichConcurrency) {
     "use strict";
@@ -24,7 +24,7 @@ function EnrichStream(shouldEnrichFunc, enrichFunc, enrichConcurrency) {
 
     if (!enrichFunc) {
         enrichFunc = function (data, callback) {
-            callback();
+            callback(null, data);
         };
     }
 
@@ -41,35 +41,38 @@ function EnrichStream(shouldEnrichFunc, enrichFunc, enrichConcurrency) {
     var destroyed = false;
 
 
-    function workCompleted(work) {
-        work.done = true;
-
+    function workCompleted() {
         if (streamingOut || destroyed) {
             return;
         }
 
         streamingOut = true;
         while (streamingOut && buffer.length && buffer[0].done) {
+//            console.log("Enriched %s", buffer[0].data._id);
             self.emit('data', buffer.shift().data);
             completedCount++;
         }
         streamingOut = false;
 
+        console.log("endWanted %d, completedCount %d, workCount %d", endWanted, completedCount, workCount);
         if (endWanted === true && completedCount === workCount) {
             self.ended = true;
             self.writable = false;
             self.emit('end');
+            console.log("Done enriching");
         }
     }
 
 
     function getEnrichedFunc(work) {
-        return function (err) {
+        return function (err, enrichedData) {
             if (err) {
                 console.log(err);
             }
 
-            workCompleted(work);
+            work.data = enrichedData;
+            work.done = true;
+            workCompleted();
         };
     }
 
@@ -82,7 +85,8 @@ function EnrichStream(shouldEnrichFunc, enrichFunc, enrichConcurrency) {
         if (shouldEnrichFunc(work.data)) {
             queue.push(data, getEnrichedFunc(work));
         } else {
-            workCompleted(work);
+            work.done = true;
+            workCompleted();
         }
 
         return true;
@@ -90,11 +94,13 @@ function EnrichStream(shouldEnrichFunc, enrichFunc, enrichConcurrency) {
 
 
     this.end = function (data) {
+        endWanted = true;
+
         if (data) {
             this.write(data);
+        } else {
+            workCompleted(); // Flush out any remaining completed work and ensure 'end' is emitted
         }
-
-        endWanted = true;
     };
 
 
