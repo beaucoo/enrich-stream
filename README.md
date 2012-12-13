@@ -10,7 +10,7 @@ A stream that enables asynchronous enrichment of data with concurrency control w
 
 ##Use Cases
 Given that enrichment likely takes time which requires buffering the current best use cases are where enrichment is expected to be relatively fast.
-Use a [control stream](https://github.com/substack/stream-handbook#control-streams) or other mechanism could be used to tune performance.
+Use a [control stream](https://github.com/substack/stream-handbook#control-streams) or other mechanism to tune performance as a pre/post step.
 
 
 ##Running Tests
