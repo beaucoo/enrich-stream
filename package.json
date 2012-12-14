@@ -1,6 +1,6 @@
 {
     "name":"enrich-stream",
-    "version":"0.1.0",
+    "version":"1.0.0",
     "description":"A stream that enables asynchronous enrichment of data with concurrency control while preserving FIFO ordering.",
     "main":"./enrich-stream",
     "keywords":[
